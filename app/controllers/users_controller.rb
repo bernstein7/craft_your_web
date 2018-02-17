@@ -4,22 +4,18 @@ class UsersController < ApplicationController
   before_action -> { redirect_to :root if current_user }
 
   def new
-    @user = User.new
+    registration_form = FormObjects::InitialRegistration.new
+    render locals: { registration: registration_form }
   end
 
   def create
-    @user = User.new(allowed_params)
-    if @user.save
-      init_session_for(@user)
+    registration_form = FormObjects::InitialRegistration.new(params)
+
+    if registration_form.save
+      init_session_for(registration_form.user)
       redirect_to root_url, notice: 'Thank you for signing up!'
     else
-      render :new
+      render :new, locals: { registration: registration_form }
     end
-  end
-
-  private
-
-  def allowed_params
-    params.require(:user).permit(:email, :password, :password_confirmation)
   end
 end
